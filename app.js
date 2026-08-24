@@ -1725,9 +1725,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const uriEl = document.getElementById('redirectUriDisplay');
   if (uriEl) uriEl.textContent = getRedirectUrl();
 
-  document.getElementById('twitchClientIdField').value = APP_STATE.auth.clientId;
-  document.getElementById('targetChannelField').value = APP_STATE.auth.channel;
-  document.getElementById('quickChannelInput').value = APP_STATE.auth.channel || DEFAULT_CHANNEL;
+  const clientIdField = document.getElementById('twitchClientIdField');
+  if (clientIdField) clientIdField.value = APP_STATE.auth.clientId;
+  
+  const targetChannelField = document.getElementById('targetChannelField');
+  if (targetChannelField) targetChannelField.value = APP_STATE.auth.channel;
+  
+  const quickChannelInput = document.getElementById('quickChannelInput');
+  if (quickChannelInput) quickChannelInput.value = APP_STATE.auth.channel || DEFAULT_CHANNEL;
 
   // Validate stored token or connect IRC on startup
   if (APP_STATE.auth.token) {
@@ -1743,69 +1748,86 @@ document.addEventListener('DOMContentLoaded', () => {
   setupMacrosManager();
 
   // Quick Channel Joiner
-  document.getElementById('quickJoinBtn').addEventListener('click', () => {
-    const ch = document.getElementById('quickChannelInput').value.trim();
-    if (ch) {
-      APP_STATE.settings.simMode = false;
-      localStorage.setItem('sp_sim_mode', 'false');
-      document.getElementById('simModeToggle').classList.remove('active');
-      document.getElementById('simModeLabel').textContent = 'LIVE API MODE';
-      connectToTwitchChannel(ch);
-    }
-  });
-
-  document.getElementById('quickChannelInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      const ch = e.target.value.trim();
+  const quickJoinBtn = document.getElementById('quickJoinBtn');
+  if (quickJoinBtn && quickChannelInput) {
+    quickJoinBtn.addEventListener('click', () => {
+      const ch = quickChannelInput.value.trim();
       if (ch) {
         APP_STATE.settings.simMode = false;
         localStorage.setItem('sp_sim_mode', 'false');
-        document.getElementById('simModeToggle').classList.remove('active');
-        document.getElementById('simModeLabel').textContent = 'LIVE API MODE';
+        const simModeToggle = document.getElementById('simModeToggle');
+        if (simModeToggle) simModeToggle.classList.remove('active');
+        const simModeLabel = document.getElementById('simModeLabel');
+        if (simModeLabel) simModeLabel.textContent = 'LIVE API MODE';
         connectToTwitchChannel(ch);
       }
-    }
-  });
+    });
+
+    quickChannelInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const ch = e.target.value.trim();
+        if (ch) {
+          APP_STATE.settings.simMode = false;
+          localStorage.setItem('sp_sim_mode', 'false');
+          const simModeToggle = document.getElementById('simModeToggle');
+          if (simModeToggle) simModeToggle.classList.remove('active');
+          const simModeLabel = document.getElementById('simModeLabel');
+          if (simModeLabel) simModeLabel.textContent = 'LIVE API MODE';
+          connectToTwitchChannel(ch);
+        }
+      }
+    });
+  }
 
   // Simulator Toggle
   const simToggle = document.getElementById('simModeToggle');
-  simToggle.classList.toggle('active', APP_STATE.settings.simMode);
-  document.getElementById('simModeLabel').textContent = APP_STATE.settings.simMode ? 'SIMULATOR ACTIVE' : 'LIVE API MODE';
-
-  simToggle.addEventListener('click', () => {
-    APP_STATE.settings.simMode = !APP_STATE.settings.simMode;
-    localStorage.setItem('sp_sim_mode', APP_STATE.settings.simMode);
+  if (simToggle) {
     simToggle.classList.toggle('active', APP_STATE.settings.simMode);
     document.getElementById('simModeLabel').textContent = APP_STATE.settings.simMode ? 'SIMULATOR ACTIVE' : 'LIVE API MODE';
-    updateDiagnosticsUI();
+    
+    simToggle.addEventListener('click', () => {
+      APP_STATE.settings.simMode = !APP_STATE.settings.simMode;
+      localStorage.setItem('sp_sim_mode', APP_STATE.settings.simMode);
+      simToggle.classList.toggle('active', APP_STATE.settings.simMode);
+      document.getElementById('simModeLabel').textContent = APP_STATE.settings.simMode ? 'SIMULATOR ACTIVE' : 'LIVE API MODE';
+      updateDiagnosticsUI();
 
-    if (APP_STATE.settings.simMode) {
-      loadSimulatedStreamers();
-      triggerToast('Switched to Demo Simulator Mode', 'info');
-    } else {
-      APP_STATE.chatters.clear();
-      document.getElementById('chatterCountBadge').textContent = '0';
-      refreshChattersDeck();
-      connectToTwitchChannel(APP_STATE.auth.channel || DEFAULT_CHANNEL);
-      triggerToast('Switched to Live API Mode', 'info');
-    }
-  });
+      if (APP_STATE.settings.simMode) {
+        loadSimulatedStreamers();
+        triggerToast('Switched to Demo Simulator Mode', 'info');
+      } else {
+        APP_STATE.chatters.clear();
+        document.getElementById('chatterCountBadge').textContent = '0';
+        refreshChattersDeck();
+        connectToTwitchChannel(APP_STATE.auth.channel || DEFAULT_CHANNEL);
+        triggerToast('Switched to Live API Mode', 'info');
+      }
+    });
+  }
 
   // Sound Feedback Toggle
   const soundBtn = document.getElementById('soundToggleBtn');
-  soundBtn.addEventListener('click', () => {
-    APP_STATE.settings.soundEnabled = !APP_STATE.settings.soundEnabled;
-    localStorage.setItem('sp_sound', APP_STATE.settings.soundEnabled);
-    soundBtn.classList.toggle('active', APP_STATE.settings.soundEnabled);
-    document.querySelector('.icon-sound-on').classList.toggle('hidden', !APP_STATE.settings.soundEnabled);
-    document.querySelector('.icon-sound-off').classList.toggle('hidden', APP_STATE.settings.soundEnabled);
-    triggerToast(`Audio Effects: ${APP_STATE.settings.soundEnabled ? 'ON' : 'OFF'}`, 'info');
-  });
+  if (soundBtn) {
+    soundBtn.addEventListener('click', () => {
+      APP_STATE.settings.soundEnabled = !APP_STATE.settings.soundEnabled;
+      localStorage.setItem('sp_sound', APP_STATE.settings.soundEnabled);
+      soundBtn.classList.toggle('active', APP_STATE.settings.soundEnabled);
+      const iconSoundOn = document.querySelector('.icon-sound-on');
+      const iconSoundOff = document.querySelector('.icon-sound-off');
+      if (iconSoundOn) iconSoundOn.classList.toggle('hidden', !APP_STATE.settings.soundEnabled);
+      if (iconSoundOff) iconSoundOff.classList.toggle('hidden', APP_STATE.settings.soundEnabled);
+      triggerToast(`Audio Effects: ${APP_STATE.settings.soundEnabled ? 'ON' : 'OFF'}`, 'info');
+    });
+  }
 
   // Settings Modal
   const settingsModal = document.getElementById('settingsModal');
-  document.getElementById('openSettingsBtn').addEventListener('click', () => settingsModal.classList.remove('hidden'));
-  document.getElementById('closeSettingsModalBtn').addEventListener('click', () => settingsModal.classList.add('hidden'));
+  const openSettingsBtn = document.getElementById('openSettingsBtn');
+  const closeSettingsModalBtn = document.getElementById('closeSettingsModalBtn');
+  if (settingsModal && openSettingsBtn && closeSettingsModalBtn) {
+    openSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+    closeSettingsModalBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+  }
 
   // copyRedirectBtn removed from simplified UI — guard in case it exists
   const copyRedirectBtn = document.getElementById('copyRedirectBtn');
@@ -1816,32 +1838,44 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  document.getElementById('saveSettingsBtn').addEventListener('click', () => {
-    // Client ID always bundled — only save channel override and direct token
-    const ch = document.getElementById('targetChannelField').value.trim() || DEFAULT_CHANNEL;
-    const directToken = document.getElementById('twitchDirectTokenField').value.trim();
+  const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+  if (saveSettingsBtn) {
+    saveSettingsBtn.addEventListener('click', () => {
+      // Client ID always bundled — only save channel override and direct token
+      const targetChannelField = document.getElementById('targetChannelField');
+      const ch = (targetChannelField ? targetChannelField.value.trim() : '') || DEFAULT_CHANNEL;
+      const twitchDirectTokenField = document.getElementById('twitchDirectTokenField');
+      const directToken = twitchDirectTokenField ? twitchDirectTokenField.value.trim() : '';
 
-    APP_STATE.auth.channel = ch;
-    localStorage.setItem('sp_twitch_channel', ch);
+      APP_STATE.auth.channel = ch;
+      localStorage.setItem('sp_twitch_channel', ch);
 
-    if (directToken) {
-      APP_STATE.auth.token = directToken.replace(/^oauth:/, '');
-      localStorage.setItem('sp_twitch_token', APP_STATE.auth.token);
-      validateAndLoadToken();
-    } else if (ch) {
-      connectToTwitchChannel(ch);
-    }
+      if (directToken) {
+        APP_STATE.auth.token = directToken.replace(/^oauth:/, '');
+        localStorage.setItem('sp_twitch_token', APP_STATE.auth.token);
+        validateAndLoadToken();
+      } else if (ch) {
+        connectToTwitchChannel(ch);
+      }
 
-    settingsModal.classList.add('hidden');
-    triggerToast('Settings applied.', 'success');
-  });
+      if (settingsModal) settingsModal.classList.add('hidden');
+      triggerToast('Settings applied.', 'success');
+    });
+  }
 
-  document.getElementById('launchOAuthBtn').addEventListener('click', startTwitchOAuth);
-  document.getElementById('connectTwitchBtn').addEventListener('click', () => {
-    // If client ID is already set, launch OAuth directly!
-    startTwitchOAuth();
-  });
-  document.getElementById('disconnectBtn').addEventListener('click', handleDisconnect);
+  const launchOAuthBtn = document.getElementById('launchOAuthBtn');
+  if (launchOAuthBtn) launchOAuthBtn.addEventListener('click', startTwitchOAuth);
+  
+  const connectTwitchBtn = document.getElementById('connectTwitchBtn');
+  if (connectTwitchBtn) {
+    connectTwitchBtn.addEventListener('click', () => {
+      // If client ID is already set, launch OAuth directly!
+      startTwitchOAuth();
+    });
+  }
+
+  const disconnectBtn = document.getElementById('disconnectBtn');
+  if (disconnectBtn) disconnectBtn.addEventListener('click', handleDisconnect);
 
   // OBS Custom Browser Dock Modal
   const obsDockModal = document.getElementById('obsDockModal');
@@ -1896,71 +1930,79 @@ document.addEventListener('DOMContentLoaded', () => {
   const templatePreview = document.getElementById('templatePreviewBox');
 
   function refreshTemplatePreview() {
+    if (!templatePreview || !templateTextarea) return;
     templatePreview.textContent = templateTextarea.value
       .replace(/{username}/g, 'ValkyriePro')
       .replace(/{game}/g, 'Valorant')
       .replace(/{url}/g, 'https://twitch.tv/ValkyriePro');
   }
 
-  templateTextarea.value = APP_STATE.settings.shoutoutTemplate;
-  refreshTemplatePreview();
-  templateTextarea.addEventListener('input', refreshTemplatePreview);
+  if (templateTextarea && templateModal) {
+    templateTextarea.value = APP_STATE.settings.shoutoutTemplate;
+    refreshTemplatePreview();
+    templateTextarea.addEventListener('input', refreshTemplatePreview);
 
-  document.getElementById('editTemplateBtn').addEventListener('click', () => templateModal.classList.remove('hidden'));
-  document.getElementById('closeTemplateModalBtn').addEventListener('click', () => templateModal.classList.add('hidden'));
+    document.getElementById('editTemplateBtn').addEventListener('click', () => templateModal.classList.remove('hidden'));
+    document.getElementById('closeTemplateModalBtn').addEventListener('click', () => templateModal.classList.add('hidden'));
 
-  document.querySelectorAll('.tag-chip').forEach(tag => {
-    tag.addEventListener('click', () => {
-      templateTextarea.value += ' ' + tag.getAttribute('data-tag');
+    document.querySelectorAll('.tag-chip').forEach(tag => {
+      tag.addEventListener('click', () => {
+        templateTextarea.value += ' ' + tag.getAttribute('data-tag');
+        refreshTemplatePreview();
+      });
+    });
+
+    document.getElementById('saveTemplateBtn').addEventListener('click', () => {
+      APP_STATE.settings.shoutoutTemplate = templateTextarea.value;
+      localStorage.setItem('sp_so_template', templateTextarea.value);
+      templateModal.classList.add('hidden');
+      triggerToast('Shoutout template updated!', 'success');
+    });
+
+    document.getElementById('resetTemplateBtn').addEventListener('click', () => {
+      templateTextarea.value = '⭐ Check out @{username} at https://twitch.tv/{username} ! They were last streaming {game} — give them a follow! 💜';
       refreshTemplatePreview();
     });
-  });
-
-  document.getElementById('saveTemplateBtn').addEventListener('click', () => {
-    APP_STATE.settings.shoutoutTemplate = templateTextarea.value;
-    localStorage.setItem('sp_so_template', templateTextarea.value);
-    templateModal.classList.add('hidden');
-    triggerToast('Shoutout template updated!', 'success');
-  });
-
-  document.getElementById('resetTemplateBtn').addEventListener('click', () => {
-    templateTextarea.value = '⭐ Check out @{username} at https://twitch.tv/{username} ! They were last streaming {game} — give them a follow! 💜';
-    refreshTemplatePreview();
-  });
+  }
 
   // Manual Shoutout
   const manualInput = document.getElementById('manualShoutoutInput');
   const clearSearchBtn = document.getElementById('clearSearchBtn');
 
-  manualInput.addEventListener('input', () => {
-    clearSearchBtn.classList.toggle('hidden', !manualInput.value);
-  });
+  if (manualInput && clearSearchBtn) {
+    manualInput.addEventListener('input', () => {
+      clearSearchBtn.classList.toggle('hidden', !manualInput.value);
+    });
 
-  clearSearchBtn.addEventListener('click', () => {
-    manualInput.value = '';
-    clearSearchBtn.classList.add('hidden');
-    manualInput.focus();
-  });
-
-  document.getElementById('manualShoutoutBtn').addEventListener('click', () => {
-    const u = manualInput.value.trim();
-    if (u) {
-      sendTwitchShoutout(u);
+    clearSearchBtn.addEventListener('click', () => {
       manualInput.value = '';
       clearSearchBtn.classList.add('hidden');
-    }
-  });
+      manualInput.focus();
+    });
 
-  manualInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      const u = e.target.value.trim();
-      if (u) {
-        sendTwitchShoutout(u);
-        manualInput.value = '';
-        clearSearchBtn.classList.add('hidden');
-      }
+    const manualShoutoutBtn = document.getElementById('manualShoutoutBtn');
+    if (manualShoutoutBtn) {
+      manualShoutoutBtn.addEventListener('click', () => {
+        const u = manualInput.value.trim();
+        if (u) {
+          sendTwitchShoutout(u);
+          manualInput.value = '';
+          clearSearchBtn.classList.add('hidden');
+        }
+      });
     }
-  });
+
+    manualInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const u = e.target.value.trim();
+        if (u) {
+          sendTwitchShoutout(u);
+          manualInput.value = '';
+          clearSearchBtn.classList.add('hidden');
+        }
+      }
+    });
+  }
 
   // Filter Tabs
   document.querySelectorAll('.filter-tab').forEach(tab => {
@@ -1985,20 +2027,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  document.getElementById('clearDeckBtn').addEventListener('click', () => {
-    APP_STATE.chatters.clear();
-    document.getElementById('chatterCountBadge').textContent = '0';
-    refreshChattersDeck();
-    triggerToast('Chatter deck cleared.', 'info');
-  });
+  const clearDeckBtn = document.getElementById('clearDeckBtn');
+  if (clearDeckBtn) {
+    clearDeckBtn.addEventListener('click', () => {
+      APP_STATE.chatters.clear();
+      document.getElementById('chatterCountBadge').textContent = '0';
+      refreshChattersDeck();
+      triggerToast('Chatter deck cleared.', 'info');
+    });
+  }
 
   // Stream Deck Actions
-  document.getElementById('createClipBtn').addEventListener('click', triggerLiveClip);
-  document.getElementById('copyClipUrlBtn').addEventListener('click', () => {
-    const url = document.getElementById('clipUrlText').textContent;
-    navigator.clipboard.writeText(url);
-    triggerToast('Clip URL copied!', 'success');
-  });
+  const createClipBtn = document.getElementById('createClipBtn');
+  if (createClipBtn) createClipBtn.addEventListener('click', triggerLiveClip);
+  
+  const copyClipUrlBtn = document.getElementById('copyClipUrlBtn');
+  if (copyClipUrlBtn) {
+    copyClipUrlBtn.addEventListener('click', () => {
+      const url = document.getElementById('clipUrlText').textContent;
+      navigator.clipboard.writeText(url);
+      triggerToast('Clip URL copied!', 'success');
+    });
+  }
 
   // Chat Safety Modes: Restore visual states and attach listeners
   updateChatModeUI('emote');
@@ -2014,27 +2064,36 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Nuke / Clear Live Chat Button
-  document.getElementById('clearChatBtn').addEventListener('click', nukeLiveChat);
+  const clearChatBtn = document.getElementById('clearChatBtn');
+  if (clearChatBtn) clearChatBtn.addEventListener('click', nukeLiveChat);
 
   // Broadcaster Chat Composer
-  document.getElementById('chatComposerForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const input = document.getElementById('broadcasterChatInput');
-    const msg = input.value.trim();
-    if (msg) {
-      sendBroadcasterChatMessage(msg);
-      input.value = '';
-    }
-  });
+  const chatComposerForm = document.getElementById('chatComposerForm');
+  if (chatComposerForm) {
+    chatComposerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('broadcasterChatInput');
+      const msg = input.value.trim();
+      if (msg) {
+        sendBroadcasterChatMessage(msg);
+        input.value = '';
+      }
+    });
+  }
 
   // Mod Flyout
-  document.getElementById('closeFlyoutBtn').addEventListener('click', closeModFlyout);
-  document.getElementById('flyoutShoutoutBtn').addEventListener('click', () => {
-    if (selectedFlyoutUser) {
-      sendTwitchShoutout(selectedFlyoutUser);
-      closeModFlyout();
-    }
-  });
+  const closeFlyoutBtn = document.getElementById('closeFlyoutBtn');
+  if (closeFlyoutBtn) closeFlyoutBtn.addEventListener('click', closeModFlyout);
+  
+  const flyoutShoutoutBtn = document.getElementById('flyoutShoutoutBtn');
+  if (flyoutShoutoutBtn) {
+    flyoutShoutoutBtn.addEventListener('click', () => {
+      if (selectedFlyoutUser) {
+        sendTwitchShoutout(selectedFlyoutUser);
+        closeModFlyout();
+      }
+    });
+  }
 
   document.querySelectorAll('.flyout-grid-btn').forEach(b => {
     b.addEventListener('click', () => {
@@ -2044,10 +2103,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  document.getElementById('flyoutBanBtn').addEventListener('click', () => {
-    triggerToast(`Banned user @${selectedFlyoutUser}`, 'error');
-    closeModFlyout();
-  });
+  const flyoutBanBtn = document.getElementById('flyoutBanBtn');
+  if (flyoutBanBtn) {
+    flyoutBanBtn.addEventListener('click', () => {
+      triggerToast(`Banned user @${selectedFlyoutUser}`, 'error');
+      closeModFlyout();
+    });
+  }
 
   // Global Keyboard Shortcuts
   window.addEventListener('keydown', (e) => {
