@@ -1850,13 +1850,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeObsDockModalConfirmBtn = document.getElementById('closeObsDockModalConfirmBtn');
   const copyObsDockUrlBtn = document.getElementById('copyObsDockUrlBtn');
 
-  const dockUrl = window.location.origin + '/dock.html';
+  // Build dock URL relative to current page's folder (works on localhost AND GitHub Pages /StreamDeck/)
+  const dockUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'dock.html';
   const dockDisplay = document.getElementById('obsDockUrlDisplay');
   if (dockDisplay) dockDisplay.textContent = dockUrl;
 
   if (openObsDockBtn) openObsDockBtn.addEventListener('click', () => obsDockModal.classList.remove('hidden'));
   if (closeObsDockModalBtn) closeObsDockModalBtn.addEventListener('click', () => obsDockModal.classList.add('hidden'));
   if (closeObsDockModalConfirmBtn) closeObsDockModalConfirmBtn.addEventListener('click', () => obsDockModal.classList.add('hidden'));
+
+  // Set "Open Dock in New Tab" link href dynamically
+  const openDockNewTabBtn = document.getElementById('openDockNewTabBtn');
+  if (openDockNewTabBtn) openDockNewTabBtn.href = dockUrl;
 
   if (copyObsDockUrlBtn) {
     copyObsDockUrlBtn.addEventListener('click', () => {
