@@ -636,7 +636,7 @@
 
     <!-- ================= MODALS & OVERLAYS ================= -->
 
-    <!-- Twitch API Credentials & Settings Modal -->
+    <!-- Twitch Auth Modal -->
     <div class="modal-scrim hidden" id="settingsModal" role="dialog" aria-modal="true"
       aria-labelledby="settingsModalTitle">
       <div class="modal-panel">
@@ -646,68 +646,46 @@
               <path
                 d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z" />
             </svg>
-            <h3 id="settingsModalTitle">Twitch API & Developer Setup</h3>
+            <h3 id="settingsModalTitle">Connect to Twitch</h3>
           </div>
           <button class="modal-close-icon" id="closeSettingsModalBtn" aria-label="Close modal">✕</button>
         </div>
 
         <div class="modal-panel-body">
-          <div class="stepper-guide">
-            <div class="step-item">
-              <span class="step-num">1</span>
-              <div class="step-content">
-                <strong>Register a Twitch Developer Application</strong>
-                <p>Visit the <a href="https://dev.twitch.tv/console/apps" target="_blank" rel="noopener"
-                    class="text-cyan">Twitch Developer Console</a> and click <em>Register Your Application</em>.</p>
-              </div>
-            </div>
-            <div class="step-item">
-              <span class="step-num">2</span>
-              <div class="step-content">
-                <strong>Set OAuth Redirect URL</strong>
-                <div class="copy-url-row">
-                  <code class="font-mono" id="redirectUriDisplay"></code>
-                  <button class="btn-xs-cyan" id="copyRedirectBtn">Copy URL</button>
-                </div>
-              </div>
-            </div>
-            <div class="step-item">
-              <span class="step-num">3</span>
-              <div class="step-content">
-                <strong>Enter Client ID or Connect directly</strong>
-                <p>Paste Client ID or paste an OAuth Token below.</p>
-              </div>
-            </div>
-          </div>
+          <!-- Primary: One-click OAuth -->
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.5;">
+              Log in with your Twitch account to unlock shoutouts, stream title editing, chat controls, safety modes, and clip creation.
+            </p>
 
-          <div class="form-group-modal">
-            <label for="twitchClientIdField">Twitch Client ID</label>
-            <input type="text" id="twitchClientIdField" placeholder="e.g. gp762nuuoqcoxypju8c569th9wz7q5"
-              class="font-mono">
-            <span class="field-caption">Your App Client ID from Twitch Developer Console.</span>
-          </div>
+            <!-- Channel username (optional override) -->
+            <div class="form-group-modal">
+              <label for="targetChannelField">Monitor a Different Channel (optional)</label>
+              <input type="text" id="targetChannelField" placeholder="Leave blank to use your own channel">
+              <span class="field-caption">Only needed if you want to watch a channel other than your own.</span>
+            </div>
 
-          <div class="form-group-modal">
-            <label for="twitchDirectTokenField">Direct OAuth Access Token (Optional Shortcut)</label>
-            <input type="password" id="twitchDirectTokenField" placeholder="oauth:xxxxxxxxxxxx or raw token"
-              class="font-mono">
-            <span class="field-caption">If you already have a Twitch OAuth token, paste it here for instant
-              login.</span>
-          </div>
-
-          <div class="form-group-modal">
-            <label for="targetChannelField">Channel Username to Monitor</label>
-            <input type="text" id="targetChannelField" placeholder="Your Twitch channel username">
+            <!-- Advanced: Direct token paste -->
+            <details style="border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:10px 12px;">
+              <summary style="font-size:0.75rem;font-weight:700;color:var(--text-secondary);cursor:pointer;user-select:none;">Advanced — Paste OAuth Token directly</summary>
+              <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;">
+                <input type="password" id="twitchDirectTokenField" placeholder="oauth:xxxxxxxxxxxx or raw token"
+                  class="font-mono" style="background:var(--surface-canvas);border:1px solid var(--border-default);border-radius:var(--radius-xs);color:var(--text-primary);padding:8px 12px;font-size:0.8rem;outline:none;">
+                <span class="field-caption">If you already have a token (e.g. from Twitch Token Generator), paste it here.</span>
+                <!-- Hidden field — kept for JS compatibility -->
+                <input type="hidden" id="twitchClientIdField" value="">
+              </div>
+            </details>
           </div>
 
           <div class="modal-footer-actions">
-            <button class="btn-secondary" id="saveSettingsBtn">Save & Apply</button>
+            <button class="btn-secondary" id="saveSettingsBtn">Save Channel</button>
             <button class="btn-twitch-auth" id="launchOAuthBtn">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                 <path
                   d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z" />
               </svg>
-              <span>Authorize with Twitch</span>
+              <span>Login with Twitch</span>
             </button>
           </div>
         </div>

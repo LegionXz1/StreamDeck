@@ -1,14 +1,16 @@
 /**
  * StreamerDeck by.legionx — Broadcast Deck & Twitch Auto-Shoutout Engine
- * Enter your Twitch Client ID in the Settings panel (⚙ icon) to get started.
- * Create a Twitch Developer App at: https://dev.twitch.tv/console/apps
+ * Users just click "Connect Twitch" — no setup needed.
+ * Built on Twitch Implicit Grant OAuth (Client ID is public, no secret required).
  */
 
 // ==========================================================================
 // APPLICATION STATE
 // ==========================================================================
 
-const DEFAULT_CLIENT_ID = ''; // Enter your own Twitch Client ID in the Settings panel
+// Public Twitch Client ID (Implicit Grant — safe to hardcode, no secret involved)
+// All visitors use this app registration; each user gets their OWN token in their browser.
+const DEFAULT_CLIENT_ID = 'iit7nefwjmvapujq4lttes3qbt90y5';
 const DEFAULT_CHANNEL = '';
 
 const DEFAULT_MACROS = [
@@ -205,7 +207,8 @@ function processOAuthCallback() {
 }
 
 function startTwitchOAuth() {
-  const clientId = document.getElementById('twitchClientIdField').value.trim() || APP_STATE.auth.clientId || DEFAULT_CLIENT_ID;
+  // Use DEFAULT_CLIENT_ID (bundled) — users don't need to enter their own
+  const clientId = APP_STATE.auth.clientId || DEFAULT_CLIENT_ID;
   APP_STATE.auth.clientId = clientId;
   localStorage.setItem('sp_twitch_client_id', clientId);
 
@@ -1804,19 +1807,21 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('openSettingsBtn').addEventListener('click', () => settingsModal.classList.remove('hidden'));
   document.getElementById('closeSettingsModalBtn').addEventListener('click', () => settingsModal.classList.add('hidden'));
 
-  document.getElementById('copyRedirectBtn').addEventListener('click', () => {
-    navigator.clipboard.writeText(getRedirectUrl());
-    triggerToast('Redirect URL copied to clipboard!', 'success');
-  });
+  // copyRedirectBtn removed from simplified UI — guard in case it exists
+  const copyRedirectBtn = document.getElementById('copyRedirectBtn');
+  if (copyRedirectBtn) {
+    copyRedirectBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(getRedirectUrl());
+      triggerToast('Redirect URL copied to clipboard!', 'success');
+    });
+  }
 
   document.getElementById('saveSettingsBtn').addEventListener('click', () => {
-    const id = document.getElementById('twitchClientIdField').value.trim() || DEFAULT_CLIENT_ID;
+    // Client ID always bundled — only save channel override and direct token
     const ch = document.getElementById('targetChannelField').value.trim() || DEFAULT_CHANNEL;
     const directToken = document.getElementById('twitchDirectTokenField').value.trim();
 
-    APP_STATE.auth.clientId = id;
     APP_STATE.auth.channel = ch;
-    localStorage.setItem('sp_twitch_client_id', id);
     localStorage.setItem('sp_twitch_channel', ch);
 
     if (directToken) {
