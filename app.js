@@ -1,14 +1,15 @@
 /**
- * StreamPulse Pro — Broadcast Deck & Twitch Auto-Shoutout Engine
- * Configured for LegionXIZ (Client ID: iit7nefwjmvapujq4lttes3qbt90y5)
+ * StreamerDeck by.legionx — Broadcast Deck & Twitch Auto-Shoutout Engine
+ * Enter your Twitch Client ID in the Settings panel (⚙ icon) to get started.
+ * Create a Twitch Developer App at: https://dev.twitch.tv/console/apps
  */
 
 // ==========================================================================
 // APPLICATION STATE
 // ==========================================================================
 
-const DEFAULT_CLIENT_ID = 'iit7nefwjmvapujq4lttes3qbt90y5';
-const DEFAULT_CHANNEL = 'LegionXIZ';
+const DEFAULT_CLIENT_ID = ''; // Enter your own Twitch Client ID in the Settings panel
+const DEFAULT_CHANNEL = '';
 
 const DEFAULT_MACROS = [
   { id: '1', cmd: '!discord', label: 'Discord Community', message: '📢 Join our official Discord community for alerts, stream schedule, and game nights: https://discord.gg/streamer' },
@@ -38,8 +39,8 @@ const APP_STATE = {
     clientId: localStorage.getItem('sp_twitch_client_id') || DEFAULT_CLIENT_ID,
     token: localStorage.getItem('sp_twitch_token') || '',
     userId: localStorage.getItem('sp_twitch_user_id') || '',
-    username: localStorage.getItem('sp_twitch_username') || DEFAULT_CHANNEL.toLowerCase(),
-    displayName: localStorage.getItem('sp_twitch_display_name') || DEFAULT_CHANNEL,
+    username: localStorage.getItem('sp_twitch_username') || '',
+    displayName: localStorage.getItem('sp_twitch_display_name') || '',
     avatar: localStorage.getItem('sp_twitch_avatar') || '',
     channel: localStorage.getItem('sp_twitch_channel') || DEFAULT_CHANNEL,
     scopes: []
@@ -55,7 +56,7 @@ const APP_STATE = {
     isLive: false,
     viewers: 0,
     uptimeSeconds: 0,
-    title: localStorage.getItem('sp_stream_title') || '🔴 [LegionXIZ] Live Stream & Community Chat',
+    title: localStorage.getItem('sp_stream_title') || '🔴 Live Stream & Community Chat',
     game: 'Just Chatting',
     gameId: '509658'
   },
