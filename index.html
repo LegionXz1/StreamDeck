@@ -216,11 +216,13 @@
         <!-- Manual Quick Shoutout Bar -->
         <div class="search-action-strip">
           <div class="search-box">
-            <svg class="search-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
-              stroke-width="2">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+            <div id="shoutoutAvatarContainer" style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%; overflow: hidden; flex-shrink: 0; margin-left: 12px; margin-right: -4px;">
+              <svg class="search-icon" id="shoutoutSearchIcon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" style="position: static; color: var(--text-muted);">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <img id="shoutoutAvatarImg" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+            </div>
             <input type="text" id="manualShoutoutInput" placeholder="Shoutout any streamer: @username"
               autocomplete="off" spellcheck="false">
             <button class="clear-search-btn hidden" id="clearSearchBtn" aria-label="Clear search input">✕</button>

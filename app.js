@@ -444,6 +444,28 @@ function handleDisconnect() {
 // 1-CLICK SHOUTOUT EXECUTION ENGINE (Helix REST API + Chat Command Fallback)
 // ==========================================================================
 
+async function fetchTwitchUserProfile(login) {
+  if (!APP_STATE.auth.token || !APP_STATE.auth.clientId) return null;
+  const clean = login.replace(/^@/, '').trim().toLowerCase();
+  if (!clean) return null;
+
+  try {
+    const res = await fetch(`https://api.twitch.tv/helix/users?login=${clean}`, {
+      headers: {
+        'Client-Id': APP_STATE.auth.clientId,
+        'Authorization': `Bearer ${APP_STATE.auth.token}`
+      }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.data && data.data[0]) return data.data[0];
+    }
+  } catch (e) {
+    console.warn('Failed to fetch user profile:', e);
+  }
+  return null;
+}
+
 async function sendTwitchShoutout(username, userId = null, game = 'Gaming') {
   const clean = username.replace(/^@/, '').toLowerCase().trim();
   const now = Date.now();
@@ -2079,14 +2101,45 @@ document.addEventListener('DOMContentLoaded', () => {
   const manualInput = document.getElementById('manualShoutoutInput');
   const clearSearchBtn = document.getElementById('clearSearchBtn');
 
+  let avatarDebounceTimer = null;
+  const processAvatarSearch = async (input, imgEl, iconEl) => {
+    const val = input.value.trim().replace(/^@/, '');
+    if (!val) {
+      if (imgEl) imgEl.style.display = 'none';
+      if (iconEl) iconEl.style.display = 'block';
+      return;
+    }
+    
+    clearTimeout(avatarDebounceTimer);
+    avatarDebounceTimer = setTimeout(async () => {
+      const user = await fetchTwitchUserProfile(val);
+      if (user && user.profile_image_url) {
+        if (imgEl) {
+          imgEl.src = user.profile_image_url;
+          imgEl.style.display = 'block';
+        }
+        if (iconEl) iconEl.style.display = 'none';
+      } else {
+        if (imgEl) imgEl.style.display = 'none';
+        if (iconEl) iconEl.style.display = 'block';
+      }
+    }, 400);
+  };
+
   if (manualInput && clearSearchBtn) {
+    const imgEl = document.getElementById('shoutoutAvatarImg');
+    const iconEl = document.getElementById('shoutoutSearchIcon');
+    
     manualInput.addEventListener('input', () => {
       clearSearchBtn.classList.toggle('hidden', !manualInput.value);
+      processAvatarSearch(manualInput, imgEl, iconEl);
     });
 
     clearSearchBtn.addEventListener('click', () => {
       manualInput.value = '';
       clearSearchBtn.classList.add('hidden');
+      if (imgEl) imgEl.style.display = 'none';
+      if (iconEl) iconEl.style.display = 'block';
       manualInput.focus();
     });
 
@@ -2104,6 +2157,8 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           manualInput.value = '';
           clearSearchBtn.classList.add('hidden');
+          if (imgEl) imgEl.style.display = 'none';
+          if (iconEl) iconEl.style.display = 'block';
         }
       });
     }
@@ -2116,6 +2171,8 @@ document.addEventListener('DOMContentLoaded', () => {
           sendTwitchShoutout(u);
           manualInput.value = '';
           clearSearchBtn.classList.add('hidden');
+          if (imgEl) imgEl.style.display = 'none';
+          if (iconEl) iconEl.style.display = 'block';
         }
       });
     }
@@ -2127,6 +2184,8 @@ document.addEventListener('DOMContentLoaded', () => {
           sendTwitchShoutout(u);
           manualInput.value = '';
           clearSearchBtn.classList.add('hidden');
+          if (imgEl) imgEl.style.display = 'none';
+          if (iconEl) iconEl.style.display = 'block';
         }
       }
     });
@@ -2252,8 +2311,20 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           triggerToast(`@${u} is already in your favorites!`, 'info');
         }
-        if (manInput) manInput.value = '';
+        if (manInput) {
+          manInput.value = '';
+          const imgEl = document.getElementById('dockShoutoutAvatarImg');
+          if (imgEl) imgEl.style.display = 'none';
+        }
       }
+    });
+  }
+
+  const dockManualInput = document.getElementById('dockManualInput');
+  if (dockManualInput) {
+    const imgEl = document.getElementById('dockShoutoutAvatarImg');
+    dockManualInput.addEventListener('input', () => {
+      processAvatarSearch(dockManualInput, imgEl, null);
     });
   }
 

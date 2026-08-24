@@ -212,8 +212,11 @@
     <main class="dock-content">
 
       <section class="dock-panel" id="panelShoutouts">
-        <div style="display: flex; gap: 4px; margin-bottom: 6px;">
-          <input type="text" id="dockManualInput" placeholder="Shoutout: @username">
+        <div style="display: flex; gap: 4px; margin-bottom: 6px; align-items: stretch;">
+          <div style="display: flex; align-items: center; background: var(--surface-2); border: 1px solid var(--border-color); border-radius: 4px; padding-left: 6px; flex: 1;">
+            <img id="dockShoutoutAvatarImg" src="" style="width: 16px; height: 16px; border-radius: 50%; object-fit: cover; display: none; margin-right: 4px;">
+            <input type="text" id="dockManualInput" placeholder="Shoutout: @username" style="border: none; background: transparent; flex: 1; padding: 0; outline: none; box-shadow: none;">
+          </div>
           <button id="dockManualBtn">SO</button>
           <button id="dockFavBtn" style="background: var(--surface-2); border: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; padding: 0 8px; border-radius: 4px;" title="Add to favorites">⭐</button>
         </div>
