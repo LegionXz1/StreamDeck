@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StreamPulse OBS Dock</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* OBS Compact Dock Optimized Styles */
+    body {
+      background-color: #07090e;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      font-size: 13px;
+    }
+
+    .obs-dock-viewport {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100%;
+      box-sizing: border-box;
+      background: #090c13;
+    }
+
+    /* OBS Compact Header */
+    .dock-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      background: #0f141f;
+      border-bottom: 1px solid #1e293b;
+      flex-shrink: 0;
+    }
+
+    .dock-brand {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dock-logo {
+      color: var(--purple-brand);
+    }
+
+    .dock-title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+
+    .dock-channel-pill {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: var(--cyan-hyper);
+      background: rgba(0, 240, 255, 0.12);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      padding: 2px 6px;
+      border-radius: var(--radius-xs);
+    }
+
+    .dock-status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--emerald-live);
+      box-shadow: 0 0 6px var(--emerald-live);
+    }
+
+    /* OBS Navigation Tabs */
+    .dock-nav {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: #0a0e17;
+      border-bottom: 1px solid #1e293b;
+      padding: 4px;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .dock-tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 6px 4px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: var(--transition-fast);
+    }
+
+    .dock-tab-btn:hover {
+      background: #141b27;
+      color: #fff;
+    }
+
+    .dock-tab-btn.active {
+      background: #182232;
+      border-color: var(--purple-brand);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(145, 70, 255, 0.2);
+    }
+
+    /* Tab Panels */
+    .dock-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .dock-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      height: 100%;
+    }
+
+    .dock-panel.hidden {
+      display: none !important;
+    }
+
+    /* Quick Hero Clip in Dock */
+    .dock-clip-hero {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(145, 70, 255, 0.1));
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.8rem;
+      transition: var(--transition-fast);
+    }
+
+    .dock-clip-hero:hover {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(145, 70, 255, 0.2));
+      border-color: var(--crimson-alert);
+    }
+
+    /* Quick Chatter Row in Dock */
+    .dock-chatter-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #111723;
+      border: 1px solid #1f293d;
+      border-radius: var(--radius-sm);
+      padding: 6px 8px;
+      gap: 8px;
+      transition: var(--transition-fast);
+    }
+
+    .dock-chatter-row:hover {
+      border-color: var(--border-strong);
+      background: #151d2c;
+    }
+
+    .dock-chatter-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .dock-avatar-disc {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #1c2436;
+      border: 1.5px solid var(--purple-brand);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .dock-chatter-meta {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .dock-chatter-name {
+      font-weight: 700;
+      font-size: 0.78rem;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dock-chatter-msg {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-dock-so {
+      background: var(--purple-brand);
+      border: none;
+      color: #fff;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.7rem;
+      padding: 4px 8px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+      transition: var(--transition-fast);
+    }
+
+    .btn-dock-so:hover {
+      background: var(--purple-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-dock-so:disabled {
+      background: #252e42;
+      color: #64748b;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Global Cooldown in Dock */
+    .dock-cooldown-bar {
+      background: #141724;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 4px 8px;
+      border-radius: var(--radius-xs);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.68rem;
+      color: var(--amber-signal);
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    /* Dock Macros 2-Col */
+    .dock-macros-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .dock-macro-btn {
+      background: #111723;
+      border: 1px solid #1f293d;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      transition: var(--transition-fast);
+    }
+
+    .dock-macro-btn:hover {
+      background: #161f30;
+      border-color: var(--cyan-hyper);
+    }
+
+    .dock-macro-cmd {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--cyan-hyper);
+    }
+
+    .dock-macro-lbl {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    /* Dock Safety Modes */
+    .dock-safety-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .dock-safety-btn {
+      background: #111723;
+      border: 1px solid #1f293d;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .dock-safety-btn:hover {
+      background: #161f30;
+      border-color: var(--border-strong);
+    }
+
+    .dock-safety-btn.active {
+      background: rgba(0, 240, 255, 0.08);
+      border-color: var(--cyan-hyper);
+    }
+
+    .dock-safety-btn.active .dock-mode-state {
+      color: var(--cyan-hyper);
+      background: rgba(0, 240, 255, 0.2);
+    }
+
+    .dock-safety-label {
+      font-weight: 700;
+      font-size: 0.72rem;
+      color: #fff;
+    }
+
+    .dock-mode-state {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      background: #090c13;
+      padding: 2px 5px;
+      border-radius: var(--radius-xs);
+    }
+  </style>
+</head>
+<body>
+  <div class="obs-dock-viewport">
+    
+    <!-- Top OBS Dock Bar -->
+    <header class="dock-header">
+      <div class="dock-brand">
+        <svg class="dock-logo" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
+        </svg>
+        <span class="dock-title">StreamPulse Dock</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span class="dock-status-dot" id="dockStatusDot"></span>
+        <span class="dock-channel-pill" id="dockChannelPill">#LegionXIZ</span>
+      </div>
+    </header>
+
+    <!-- Global Cooldown Banner (if active) -->
+    <div class="dock-cooldown-bar hidden" id="dockCooldownBar">
+      <span>⚡ Shoutout Cooldown:</span>
+      <span id="dockCooldownTime">120s</span>
+    </div>
+
+    <!-- Dock Navigation Tabs -->
+    <nav class="dock-nav">
+      <button class="dock-tab-btn active" data-tab="shoutouts" id="tabShoutouts">Shoutouts</button>
+      <button class="dock-tab-btn" data-tab="macros" id="tabMacros">Macros</button>
+      <button class="dock-tab-btn" data-tab="deck" id="tabDeck">Controls</button>
+    </nav>
+
+    <!-- Main Content Panels -->
+    <main class="dock-content">
+      
+      <!-- Panel 1: 1-Click Auto-Shoutout Deck -->
+      <section class="dock-panel" id="panelShoutouts">
+        <!-- Manual Quick Shoutout Bar -->
+        <div style="display: flex; gap: 4px;">
+          <input type="text" id="dockManualInput" placeholder="Shoutout: @username" style="flex: 1; background: #101622; border: 1px solid #1f2a3e; border-radius: 4px; color: #fff; padding: 4px 8px; font-size: 11px; outline: none;">
+          <button id="dockManualBtn" style="background: var(--purple-brand); border: none; color: #fff; font-weight: 700; font-size: 11px; padding: 4px 10px; border-radius: 4px; cursor: pointer;">SO</button>
+        </div>
+
+        <!-- Chatters List -->
+        <div id="dockChattersList" style="display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1;">
+          <div style="padding: 20px 10px; text-align: center; color: var(--text-muted); font-size: 11px;">
+            Waiting for viewers to chat on #LegionXIZ...
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel 2: Broadcast Chat Macros -->
+      <section class="dock-panel hidden" id="panelMacros">
+        <div class="dock-macros-grid" id="dockMacrosGrid">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+      <!-- Panel 3: Stream Deck & Safety Modes -->
+      <section class="dock-panel hidden" id="panelDeck">
+        <!-- 30s Clip Hero -->
+        <div class="dock-clip-hero" id="dockClipBtn">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--crimson-alert); display: inline-block;"></span>
+            <span>CLIP LAST 30 SECONDS</span>
+          </div>
+          <span style="font-family: var(--font-mono); font-size: 10px; opacity: 0.8;">Alt+C</span>
+        </div>
+
+        <!-- Safety Modes -->
+        <div style="font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-top: 4px;">Chat Safety Modes</div>
+        <div class="dock-safety-grid">
+          <button class="dock-safety-btn" data-mode="emote" id="dockBtnEmote">
+            <span class="dock-safety-label">Emote Only</span>
+            <span class="dock-mode-state" id="dockStateEmote">OFF</span>
+          </button>
+          <button class="dock-safety-btn" data-mode="sub" id="dockBtnSub">
+            <span class="dock-safety-label">Sub Only</span>
+            <span class="dock-mode-state" id="dockStateSub">OFF</span>
+          </button>
+          <button class="dock-safety-btn" data-mode="followers" id="dockBtnFollowers">
+            <span class="dock-safety-label">Followers</span>
+            <span class="dock-mode-state" id="dockStateFollowers">OFF</span>
+          </button>
+          <button class="dock-safety-btn" data-mode="slow" id="dockBtnSlow">
+            <span class="dock-safety-label">Slow (5s)</span>
+            <span class="dock-mode-state" id="dockStateSlow">OFF</span>
+          </button>
+        </div>
+
+        <!-- Nuke Chat Button -->
+        <button id="dockClearChatBtn" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--crimson-alert); padding: 8px; border-radius: 4px; font-weight: 700; font-size: 11px; cursor: pointer; margin-top: 4px;">
+          🧹 Clear / Nuke Live Chat
+        </button>
+      </section>
+
+    </main>
+
+    <!-- Toast Viewport -->
+    <div class="toast-stack" id="toastStack"></div>
+
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // OBS Dock Specific Tab Routing
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabs = document.querySelectorAll('.dock-tab-btn');
+      const panels = {
+        shoutouts: document.getElementById('panelShoutouts'),
+        macros: document.getElementById('panelMacros'),
+        deck: document.getElementById('panelDeck')
+      };
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+
+          const target = tab.getAttribute('data-tab');
+          Object.keys(panels).forEach(k => {
+            if (panels[k]) panels[k].classList.toggle('hidden', k !== target);
+          });
+        });
+      });
+
+      // Initialize Shared Macros from app.js
+      renderChatMacros();
+
+      // Render Dock Chatters
+      const origRefresh = refreshChattersDeck;
+      refreshChattersDeck = function() {
+        if (origRefresh) origRefresh();
+        const listEl = document.getElementById('dockChattersList');
+        if (!listEl) return;
+
+        const list = Array.from(APP_STATE.chatters.values()).sort((a, b) => b.lastSeen - a.lastSeen);
+        if (list.length === 0) {
+          listEl.innerHTML = `<div style="padding: 20px 10px; text-align: center; color: var(--text-muted); font-size: 11px;">Waiting for viewers on #${APP_STATE.auth.channel}...</div>`;
+          return;
+        }
+
+        listEl.innerHTML = '';
+        const now = Date.now();
+        const isGlobalCooldown = APP_STATE.cooldowns.globalExpiresAt > now;
+
+        list.forEach(c => {
+          const isUserCooldown = APP_STATE.cooldowns.userCooldowns[c.username] && APP_STATE.cooldowns.userCooldowns[c.username] > now;
+          const initial = (c.displayName || c.username).charAt(0).toUpperCase();
+
+          const row = document.createElement('div');
+          row.className = 'dock-chatter-row';
+          row.innerHTML = `
+            <div class="dock-chatter-left">
+              <div class="dock-avatar-disc" style="border-color: ${c.color};">${initial}</div>
+              <div class="dock-chatter-meta">
+                <span class="dock-chatter-name" style="color: ${c.color};">${c.displayName}</span>
+                <span class="dock-chatter-msg">"${escapeText(c.lastMessage)}"</span>
+              </div>
+            </div>
+            <div>
+              ${isUserCooldown ? `
+                <span style="font-size: 10px; color: var(--amber-signal); font-family: var(--font-mono);">60m</span>
+              ` : `
+                <button class="btn-dock-so" data-user="${c.username}" data-game="${c.lastGame}" ${isGlobalCooldown ? 'disabled' : ''}>
+                  SO
+                </button>
+              `}
+            </div>
+          `;
+
+          row.querySelector('.btn-dock-so')?.addEventListener('click', () => {
+            sendTwitchShoutout(c.username, null, c.lastGame);
+          });
+
+          listEl.appendChild(row);
+        });
+      };
+
+      // Dock Manual Shoutout
+      const manInput = document.getElementById('dockManualInput');
+      const manBtn = document.getElementById('dockManualBtn');
+      if (manBtn && manInput) {
+        manBtn.addEventListener('click', () => {
+          const u = manInput.value.trim();
+          if (u) {
+            sendTwitchShoutout(u);
+            manInput.value = '';
+          }
+        });
+      }
+
+      // Dock Clip
+      document.getElementById('dockClipBtn')?.addEventListener('click', triggerLiveClip);
+
+      // Dock Safety Mode Buttons
+      ['emote', 'sub', 'followers', 'slow'].forEach(k => {
+        const btn = document.querySelector(`.dock-safety-btn[data-mode="${k}"]`);
+        if (btn) {
+          btn.addEventListener('click', () => {
+            toggleChatSafetyMode(k);
+            btn.classList.toggle('active', APP_STATE.modes[k]);
+            const lbl = btn.querySelector('.dock-mode-state');
+            if (lbl) lbl.textContent = APP_STATE.modes[k] ? 'ON' : 'OFF';
+          });
+          btn.classList.toggle('active', APP_STATE.modes[k]);
+          const lbl = btn.querySelector('.dock-mode-state');
+          if (lbl) lbl.textContent = APP_STATE.modes[k] ? 'ON' : 'OFF';
+        }
+      });
+
+      // Dock Nuke Chat
+      document.getElementById('dockClearChatBtn')?.addEventListener('click', nukeLiveChat);
+
+      // Dock Channel name
+      const chPill = document.getElementById('dockChannelPill');
+      if (chPill) chPill.textContent = `#${APP_STATE.auth.channel || 'LegionXIZ'}`;
+    });
+  </script>
+</body>
+</html>
