@@ -1673,7 +1673,7 @@ function setupMacrosManager() {
     saveBtn.addEventListener('click', () => {
       saveMacros(workingMacros);
       modal.classList.add('hidden');
-      triggerToast('✅ Broadcast Chat Macros updated!', 'success');
+      triggerToast('💬 Broadcast Chat Macros updated! To sync to OBS, copy the Dock URL again.', 'success');
     });
   }
 
@@ -1916,9 +1916,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const token   = APP_STATE.auth.token;
     const clientId = APP_STATE.auth.clientId || DEFAULT_CLIENT_ID;
     const channel  = APP_STATE.auth.channel || APP_STATE.auth.username || '';
+    
+    // Compress and encode macros so they sync to OBS dock
+    const macrosJson = JSON.stringify(APP_STATE.macros);
+    const macrosEncoded = btoa(encodeURIComponent(macrosJson));
+
     if (token) {
-      // Encode as hash params: dock.html#t=TOKEN&c=CLIENTID&ch=CHANNEL
-      return `${base}#t=${encodeURIComponent(token)}&c=${encodeURIComponent(clientId)}&ch=${encodeURIComponent(channel)}`;
+      // Encode as hash params: dock.html#t=TOKEN&c=CLIENTID&ch=CHANNEL&m=MACROS
+      return `${base}#t=${encodeURIComponent(token)}&c=${encodeURIComponent(clientId)}&ch=${encodeURIComponent(channel)}&m=${macrosEncoded}`;
     }
     return base;
   }
