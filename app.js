@@ -305,18 +305,31 @@ async function fetchStreamDetails() {
         APP_STATE.stream.game = s.game_name;
         APP_STATE.stream.gameId = s.game_id;
 
-        document.getElementById('streamTitleInput').value = s.title;
-        document.getElementById('streamGameInput').value = s.game_name;
-        document.getElementById('viewerCounter').textContent = s.viewer_count;
-        document.getElementById('liveStatusText').textContent = 'LIVE';
-        document.getElementById('liveStatusText').className = 'live-status-text live';
-        document.getElementById('liveBeacon').className = 'pulse-beacon live';
+        const titleInput = document.getElementById('streamTitleInput');
+        if (titleInput) titleInput.value = s.title;
+        const gameInput = document.getElementById('streamGameInput');
+        if (gameInput) gameInput.value = s.game_name;
+        
+        const viewerCounter = document.getElementById('viewerCounter');
+        if (viewerCounter) viewerCounter.textContent = s.viewer_count;
+        const liveStatusText = document.getElementById('liveStatusText');
+        if (liveStatusText) {
+          liveStatusText.textContent = 'LIVE';
+          liveStatusText.className = 'live-status-text live';
+        }
+        const liveBeacon = document.getElementById('liveBeacon');
+        if (liveBeacon) liveBeacon.className = 'pulse-beacon live';
       } else {
         APP_STATE.stream.isLive = false;
-        document.getElementById('viewerCounter').textContent = '0';
-        document.getElementById('liveStatusText').textContent = 'OFFLINE';
-        document.getElementById('liveStatusText').className = 'live-status-text';
-        document.getElementById('liveBeacon').className = 'pulse-beacon';
+        const viewerCounter = document.getElementById('viewerCounter');
+        if (viewerCounter) viewerCounter.textContent = '0';
+        const liveStatusText = document.getElementById('liveStatusText');
+        if (liveStatusText) {
+          liveStatusText.textContent = 'OFFLINE';
+          liveStatusText.className = 'live-status-text';
+        }
+        const liveBeacon = document.getElementById('liveBeacon');
+        if (liveBeacon) liveBeacon.className = 'pulse-beacon';
       }
     }
   } catch (e) {
@@ -331,13 +344,13 @@ function syncAuthView() {
   const nameEl = document.getElementById('userDisplayName');
 
   if (APP_STATE.auth.token && APP_STATE.auth.username) {
-    connectBtn.classList.add('hidden');
-    userCard.classList.remove('hidden');
-    avatar.src = APP_STATE.auth.avatar || 'https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png';
-    nameEl.textContent = APP_STATE.auth.displayName || APP_STATE.auth.username;
+    if (connectBtn) connectBtn.classList.add('hidden');
+    if (userCard) userCard.classList.remove('hidden');
+    if (avatar) avatar.src = APP_STATE.auth.avatar || 'https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-70x70.png';
+    if (nameEl) nameEl.textContent = APP_STATE.auth.displayName || APP_STATE.auth.username;
   } else {
-    connectBtn.classList.remove('hidden');
-    userCard.classList.add('hidden');
+    if (connectBtn) connectBtn.classList.remove('hidden');
+    if (userCard) userCard.classList.add('hidden');
   }
 }
 
@@ -347,33 +360,45 @@ function updateDiagnosticsUI() {
   const authStatus = document.getElementById('authStatusText');
   const chatLiveDot = document.getElementById('chatLiveDot');
 
-  channelDisplay.textContent = APP_STATE.auth.channel ? `#${APP_STATE.auth.channel}` : 'Not connected';
+  if (channelDisplay) channelDisplay.textContent = APP_STATE.auth.channel ? `#${APP_STATE.auth.channel}` : 'Not connected';
 
   if (APP_STATE.settings.simMode) {
-    authStatus.textContent = 'Demo Simulator';
-    authStatus.className = 'diag-value text-amber font-mono';
-    ircStatus.textContent = 'Simulator Engine Active';
-    ircStatus.className = 'diag-value text-amber';
+    if (authStatus) {
+      authStatus.textContent = 'Demo Simulator';
+      authStatus.className = 'diag-value text-amber font-mono';
+    }
+    if (ircStatus) {
+      ircStatus.textContent = 'Simulator Engine Active';
+      ircStatus.className = 'diag-value text-amber';
+    }
     if (chatLiveDot) chatLiveDot.style.background = 'var(--amber-signal)';
     return;
   }
 
   if (APP_STATE.auth.token && APP_STATE.auth.username) {
     const hasShoutoutScope = APP_STATE.auth.scopes.includes('moderator:manage:shoutouts');
-    authStatus.textContent = `@${APP_STATE.auth.username} (${hasShoutoutScope ? 'Full Scopes' : 'Connected'})`;
-    authStatus.className = 'diag-value text-purple font-mono';
+    if (authStatus) {
+      authStatus.textContent = `@${APP_STATE.auth.username} (${hasShoutoutScope ? 'Full Scopes' : 'Connected'})`;
+      authStatus.className = 'diag-value text-purple font-mono';
+    }
   } else {
-    authStatus.textContent = 'Anonymous (Read-Only Chat)';
-    authStatus.className = 'diag-value text-muted font-mono';
+    if (authStatus) {
+      authStatus.textContent = 'Anonymous (Read-Only Chat)';
+      authStatus.className = 'diag-value text-muted font-mono';
+    }
   }
 
   if (APP_STATE.ircConnected) {
-    ircStatus.textContent = `Connected to #${APP_STATE.auth.channel}`;
-    ircStatus.className = 'diag-value text-emerald font-mono';
+    if (ircStatus) {
+      ircStatus.textContent = `Connected to #${APP_STATE.auth.channel}`;
+      ircStatus.className = 'diag-value text-emerald font-mono';
+    }
     if (chatLiveDot) chatLiveDot.style.background = 'var(--emerald-live)';
   } else {
-    ircStatus.textContent = APP_STATE.auth.channel ? `Connecting to #${APP_STATE.auth.channel}...` : 'Idle';
-    ircStatus.className = 'diag-value text-muted';
+    if (ircStatus) {
+      ircStatus.textContent = APP_STATE.auth.channel ? `Connecting to #${APP_STATE.auth.channel}...` : 'Idle';
+      ircStatus.className = 'diag-value text-muted';
+    }
     if (chatLiveDot) chatLiveDot.style.background = 'var(--text-muted)';
   }
 }
