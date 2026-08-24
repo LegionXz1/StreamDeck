@@ -817,17 +817,17 @@
             <div class="step-item">
               <span class="step-num">1</span>
               <div class="step-content">
-                <strong>Open OBS Custom Browser Docks</strong>
-                <p>In OBS Studio top menu, click <code>Docks</code> → <code>Custom Browser Docks...</code></p>
+                <strong>Login with Twitch first</strong>
+                <p>Click <strong>Connect Twitch</strong> on the main dashboard and log in. Your auth token will be embedded into the dock URL automatically.</p>
               </div>
             </div>
             <div class="step-item">
               <span class="step-num">2</span>
               <div class="step-content">
-                <strong>Add Dock Name & Paste URL</strong>
-                <p>Set Dock Name to <code>StreamerDeck Dock</code> and paste the dock URL below:</p>
+                <strong>Copy the Dock URL below</strong>
+                <p>This URL includes your auth token — OBS will auto-login when it opens the dock.</p>
                 <div class="copy-url-row" style="margin-top: 6px;">
-                  <code class="font-mono" id="obsDockUrlDisplay">Loading...</code>
+                  <code class="font-mono" id="obsDockUrlDisplay">Login with Twitch first to generate your URL</code>
                   <button class="btn-xs-cyan" id="copyObsDockUrlBtn">Copy Dock URL</button>
                 </div>
               </div>
@@ -835,8 +835,8 @@
             <div class="step-item">
               <span class="step-num">3</span>
               <div class="step-content">
-                <strong>Click Apply & Dock into OBS</strong>
-                <p>OBS will open the StreamerDeck panel. Drag and snap it anywhere on your OBS layout!</p>
+                <strong>Paste into OBS → Docks → Custom Browser Docks</strong>
+                <p>In OBS top menu: <code>Docks</code> → <code>Custom Browser Docks...</code> → set name <code>StreamerDeck</code> → paste URL → Apply.</p>
               </div>
             </div>
           </div>

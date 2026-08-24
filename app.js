@@ -1850,23 +1850,43 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeObsDockModalConfirmBtn = document.getElementById('closeObsDockModalConfirmBtn');
   const copyObsDockUrlBtn = document.getElementById('copyObsDockUrlBtn');
 
-  // Build dock URL relative to current page's folder (works on localhost AND GitHub Pages /StreamDeck/)
-  const dockUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'dock.html';
-  const dockDisplay = document.getElementById('obsDockUrlDisplay');
-  if (dockDisplay) dockDisplay.textContent = dockUrl;
+  // Build dock URL — embed auth token so OBS browser auto-logs in
+  // Token goes in the URL hash fragment (never sent to server, safe)
+  function buildDockUrl() {
+    const base = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'dock.html';
+    const token   = APP_STATE.auth.token;
+    const clientId = APP_STATE.auth.clientId || DEFAULT_CLIENT_ID;
+    const channel  = APP_STATE.auth.channel || APP_STATE.auth.username || '';
+    if (token) {
+      // Encode as hash params: dock.html#t=TOKEN&c=CLIENTID&ch=CHANNEL
+      return `${base}#t=${encodeURIComponent(token)}&c=${encodeURIComponent(clientId)}&ch=${encodeURIComponent(channel)}`;
+    }
+    return base;
+  }
 
-  if (openObsDockBtn) openObsDockBtn.addEventListener('click', () => obsDockModal.classList.remove('hidden'));
+  function refreshDockUrlDisplay() {
+    const url = buildDockUrl();
+    const dockDisplay = document.getElementById('obsDockUrlDisplay');
+    if (dockDisplay) dockDisplay.textContent = url;
+    const openDockNewTabBtn = document.getElementById('openDockNewTabBtn');
+    if (openDockNewTabBtn) openDockNewTabBtn.href = url;
+    return url;
+  }
+
+  refreshDockUrlDisplay();
+
+  if (openObsDockBtn) openObsDockBtn.addEventListener('click', () => {
+    refreshDockUrlDisplay(); // Always refresh token in URL when modal opens
+    obsDockModal.classList.remove('hidden');
+  });
   if (closeObsDockModalBtn) closeObsDockModalBtn.addEventListener('click', () => obsDockModal.classList.add('hidden'));
   if (closeObsDockModalConfirmBtn) closeObsDockModalConfirmBtn.addEventListener('click', () => obsDockModal.classList.add('hidden'));
 
-  // Set "Open Dock in New Tab" link href dynamically
-  const openDockNewTabBtn = document.getElementById('openDockNewTabBtn');
-  if (openDockNewTabBtn) openDockNewTabBtn.href = dockUrl;
-
   if (copyObsDockUrlBtn) {
     copyObsDockUrlBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(dockUrl);
-      triggerToast('📋 OBS Dock URL copied to clipboard!', 'success');
+      const url = refreshDockUrlDisplay();
+      navigator.clipboard.writeText(url);
+      triggerToast('📋 OBS Dock URL copied! Auth token included — paste into OBS.', 'success');
     });
   }
 

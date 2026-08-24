@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
@@ -264,9 +264,31 @@
     <div class="toast-stack" id="toastStack"></div>
   </div>
 
+  <!-- Token bootstrap: must run BEFORE app.js -->
+  <!-- Reads auth credentials from URL hash (#t=TOKEN&c=CLIENTID&ch=CHANNEL) -->
+  <!-- This is how OBS dock auto-logs in without manual OAuth flow -->
+  <script>
+    (function() {
+      const hash = window.location.hash.substring(1);
+      if (!hash) return;
+      const params = new URLSearchParams(hash);
+      const token    = params.get('t');
+      const clientId = params.get('c');
+      const channel  = params.get('ch');
+      if (token) {
+        localStorage.setItem('sp_twitch_token',    token);
+        if (clientId) localStorage.setItem('sp_twitch_client_id', clientId);
+        if (channel)  localStorage.setItem('sp_twitch_channel',   channel);
+        // Clean hash from URL bar (cosmetic only)
+        history.replaceState(null, '', window.location.pathname);
+      }
+    })();
+  </script>
+
   <script src="app.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+
       // Tab routing
       const tabs = document.querySelectorAll('.dock-tab-btn');
       const panels = {
