@@ -279,8 +279,8 @@
         localStorage.setItem('sp_twitch_token',    token);
         if (clientId) localStorage.setItem('sp_twitch_client_id', clientId);
         if (channel)  localStorage.setItem('sp_twitch_channel',   channel);
-        // Clean hash from URL bar (cosmetic only)
-        history.replaceState(null, '', window.location.pathname);
+        // Do NOT use history.replaceState to clear the hash.
+        // We want OBS to save the URL *with* the token so it persists across restarts.
       }
     })();
   </script>
