@@ -20,6 +20,17 @@ const DEFAULT_MACROS = [
   { id: '4', cmd: '!lurk', label: 'Lurk Acknowledgement', message: '☕ [LURK ACTIVATED] Enjoy your lurk, grab a drink, and thank you so much for the support!' }
 ];
 
+function loadSavedFavorites() {
+  try {
+    const raw = localStorage.getItem('sp_chat_favs');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (e) {}
+  return []; // Default to empty list
+}
+
 function loadSavedMacros() {
   try {
     const raw = localStorage.getItem('sp_chat_macros');
@@ -74,6 +85,7 @@ const APP_STATE = {
     slow: localStorage.getItem('sp_mode_slow') === 'true'
   },
   macros: loadSavedMacros(),
+  favorites: loadSavedFavorites(),
   ircSocket: null,
   ircConnected: false
 };
@@ -1562,6 +1574,10 @@ window.addEventListener('storage', (e) => {
     APP_STATE.macros = loadSavedMacros();
     renderChatMacros();
   }
+  if (e.key === 'sp_chat_favs') {
+    APP_STATE.favorites = loadSavedFavorites();
+    renderFavorites();
+  }
   if (e.key && e.key.startsWith('sp_mode_')) {
     const key = e.key.replace('sp_mode_', '');
     APP_STATE.modes[key] = e.newValue === 'true';
@@ -1571,6 +1587,66 @@ window.addEventListener('storage', (e) => {
     APP_STATE.settings.shoutoutTemplate = e.newValue;
   }
 });
+
+function saveFavorites(list) {
+  APP_STATE.favorites = list;
+  localStorage.setItem('sp_chat_favs', JSON.stringify(list));
+  renderFavorites();
+}
+
+function renderFavorites() {
+  const dashStrip = document.getElementById('favoritesStrip');
+  const dockStrip = document.getElementById('dockFavoritesStrip');
+
+  const renderToStrip = (strip, isDock) => {
+    if (!strip) return;
+    strip.innerHTML = '';
+    
+    if (APP_STATE.favorites.length === 0) {
+      strip.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem; padding: 4px 0;">No favorites added. Use the ⭐ button next to the Shoutout input!</span>`;
+      return;
+    }
+
+    APP_STATE.favorites.forEach(fav => {
+      const chip = document.createElement('div');
+      chip.style.cssText = `
+        display: inline-flex; align-items: center; gap: 6px; 
+        background: var(--surface-3); border: 1px solid var(--border-color); 
+        padding: 4px 10px; border-radius: 12px; font-size: 0.85rem;
+        cursor: pointer; transition: all 0.2s; user-select: none;
+      `;
+      chip.innerHTML = `
+        <span style="color: var(--purple-accent); font-weight: 500;">@${escapeText(fav)}</span>
+        <button class="remove-fav-btn" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0 4px; font-size: 0.9rem; line-height: 1;">✕</button>
+      `;
+
+      // Click name to shoutout
+      chip.querySelector('span').addEventListener('click', () => {
+        sendTwitchShoutout(fav);
+        if (isDock) {
+          const input = document.getElementById('dockManualInput');
+          if (input) input.value = '';
+        } else {
+          const input = document.getElementById('manualShoutoutInput');
+          if (input) input.value = '';
+        }
+      });
+
+      // Click X to remove
+      chip.querySelector('.remove-fav-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const newList = APP_STATE.favorites.filter(f => f !== fav);
+        saveFavorites(newList);
+        triggerToast(`Removed @${fav} from favorites. Copy Dock URL to sync!`, 'info');
+      });
+
+      strip.appendChild(chip);
+    });
+  };
+
+  renderToStrip(dashStrip, false);
+  renderToStrip(dockStrip, true);
+}
 
 function setupMacrosManager() {
   const modal = document.getElementById('macrosModal');
@@ -1921,9 +1997,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const macrosJson = JSON.stringify(APP_STATE.macros);
     const macrosEncoded = btoa(encodeURIComponent(macrosJson));
 
+    // Encode favorites
+    const favsJson = JSON.stringify(APP_STATE.favorites);
+    const favsEncoded = btoa(encodeURIComponent(favsJson));
+
     if (token) {
-      // Encode as hash params: dock.html#t=TOKEN&c=CLIENTID&ch=CHANNEL&m=MACROS
-      return `${base}#t=${encodeURIComponent(token)}&c=${encodeURIComponent(clientId)}&ch=${encodeURIComponent(channel)}&m=${macrosEncoded}`;
+      // Encode as hash params: dock.html#t=TOKEN&c=CLIENTID&ch=CHANNEL&m=MACROS&f=FAVS
+      return `${base}#t=${encodeURIComponent(token)}&c=${encodeURIComponent(clientId)}&ch=${encodeURIComponent(channel)}&m=${macrosEncoded}&f=${favsEncoded}`;
     }
     return base;
   }
@@ -2009,6 +2089,24 @@ document.addEventListener('DOMContentLoaded', () => {
       clearSearchBtn.classList.add('hidden');
       manualInput.focus();
     });
+
+    const addFavoriteBtn = document.getElementById('addFavoriteBtn');
+    if (addFavoriteBtn) {
+      addFavoriteBtn.addEventListener('click', () => {
+        const u = manualInput.value.trim().replace(/^@/, '');
+        if (u) {
+          if (!APP_STATE.favorites.includes(u)) {
+            const newList = [...APP_STATE.favorites, u];
+            saveFavorites(newList);
+            triggerToast(`⭐ Added @${u} to favorites! Copy Dock URL to sync!`, 'success');
+          } else {
+            triggerToast(`@${u} is already in your favorites!`, 'info');
+          }
+          manualInput.value = '';
+          clearSearchBtn.classList.add('hidden');
+        }
+      });
+    }
 
     const manualShoutoutBtn = document.getElementById('manualShoutoutBtn');
     if (manualShoutoutBtn) {
@@ -2140,6 +2238,27 @@ document.addEventListener('DOMContentLoaded', () => {
       closeModFlyout();
     });
   }
+
+  const dockFavBtn = document.getElementById('dockFavBtn');
+  if (dockFavBtn) {
+    dockFavBtn.addEventListener('click', () => {
+      const manInput = document.getElementById('dockManualInput');
+      const u = manInput ? manInput.value.trim().replace(/^@/, '') : '';
+      if (u) {
+        if (!APP_STATE.favorites.includes(u)) {
+          const newList = [...APP_STATE.favorites, u];
+          saveFavorites(newList);
+          triggerToast(`⭐ Added @${u} to favorites!`, 'success');
+        } else {
+          triggerToast(`@${u} is already in your favorites!`, 'info');
+        }
+        if (manInput) manInput.value = '';
+      }
+    });
+  }
+
+  // Initialize Favorites Rendering
+  renderFavorites();
 
   // Global Keyboard Shortcuts
   window.addEventListener('keydown', (e) => {

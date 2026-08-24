@@ -212,10 +212,12 @@
     <main class="dock-content">
 
       <section class="dock-panel" id="panelShoutouts">
-        <div style="display: flex; gap: 4px;">
+        <div style="display: flex; gap: 4px; margin-bottom: 6px;">
           <input type="text" id="dockManualInput" placeholder="Shoutout: @username">
           <button id="dockManualBtn">SO</button>
+          <button id="dockFavBtn" style="background: var(--surface-2); border: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; padding: 0 8px; border-radius: 4px;" title="Add to favorites">⭐</button>
         </div>
+        <div id="dockFavoritesStrip" style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; min-height: 24px;"></div>
         <div id="dockChattersList" style="display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1;">
           <div style="padding: 20px 10px; text-align: center; color: var(--text-muted); font-size: 0.72rem;">
             Waiting for viewers to join chat...
@@ -276,6 +278,7 @@
       const clientId = params.get('c');
       const channel  = params.get('ch');
       const macros   = params.get('m');
+      const favs     = params.get('f');
       
       if (token) {
         localStorage.setItem('sp_twitch_token',    token);
@@ -288,6 +291,15 @@
             localStorage.setItem('sp_chat_macros', decoded);
           } catch (e) {
             console.warn('Failed to parse macros from URL', e);
+          }
+        }
+        
+        if (favs) {
+          try {
+            const decoded = decodeURIComponent(atob(favs));
+            localStorage.setItem('sp_chat_favs', decoded);
+          } catch (e) {
+            console.warn('Failed to parse favs from URL', e);
           }
         }
         
