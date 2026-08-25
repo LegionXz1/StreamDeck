@@ -688,6 +688,31 @@
                 <input type="hidden" id="twitchClientIdField" value="">
               </div>
             </details>
+
+            <!-- LegionX Shoutout Overlay Integration -->
+            <div style="background:var(--tint-purple-soft);border:1px solid var(--tint-purple-mid);border-radius:var(--radius-md);padding:12px 14px;display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="color:var(--purple-light);flex-shrink:0;">
+                  <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z" />
+                </svg>
+                <span style="font-size:0.82rem;font-weight:700;color:var(--purple-light);">Shoutout Overlay Integration</span>
+              </div>
+              <p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5;margin:0;">When enabled, every shoutout you trigger will also send <code style="background:var(--surface-canvas);padding:1px 5px;border-radius:3px;color:var(--purple-light);">!so @username</code> to Twitch chat — automatically activating your <strong>LegionX_Shoutout</strong> OBS overlay.</p>
+              <label class="custom-toggle" style="align-self:flex-start;">
+                <input type="checkbox" id="overlayTriggerToggle">
+                <span class="toggle-slider"></span>
+                <span class="toggle-text" style="font-size:0.8rem;font-weight:600;">Auto-trigger OBS overlay</span>
+              </label>
+              <div id="overlayCommandRow" style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:0.75rem;color:var(--text-muted);flex-shrink:0;">Chat command:</span>
+                <div style="display:flex;align-items:center;background:var(--surface-canvas);border:1px solid var(--border-default);border-radius:var(--radius-xs);padding:0 8px;">
+                  <span class="font-mono" style="font-size:0.8rem;color:var(--text-muted);">!</span>
+                  <input type="text" id="overlayCommandField" placeholder="so" maxlength="20"
+                    style="background:transparent;border:none;color:var(--text-primary);font-family:var(--font-mono);font-size:0.8rem;width:100px;outline:none;padding:5px 4px;">
+                </div>
+                <span style="font-size:0.72rem;color:var(--text-muted);">must match your overlay URL <code style="background:var(--surface-canvas);padding:1px 4px;border-radius:2px;">?command=</code> param</span>
+              </div>
+            </div>
           </div>
 
           <div class="modal-footer-actions">

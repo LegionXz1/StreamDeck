@@ -63,7 +63,9 @@ const APP_STATE = {
     postChat: localStorage.getItem('sp_post_chat') !== 'false',
     shoutoutTemplate: localStorage.getItem('sp_so_template') || '⭐ Check out @{username} at https://twitch.tv/{username} ! They were last streaming {game} — give them a follow! 💜',
     simMode: localStorage.getItem('sp_sim_mode') === 'true',
-    activeFilter: localStorage.getItem('sp_active_filter') || 'all'
+    activeFilter: localStorage.getItem('sp_active_filter') || 'all',
+    overlayTrigger: localStorage.getItem('sp_overlay_trigger') === 'true',
+    overlayCommand: localStorage.getItem('sp_overlay_command') || 'so'
   },
   stream: {
     isLive: false,
@@ -556,6 +558,13 @@ async function sendTwitchShoutout(username, userId = null, game = 'Gaming') {
     sendBroadcasterChatMessage(chatMsg);
     audio.play('shoutout');
     triggerToast(`⚡ Shoutout sent for @${clean}!`, 'success');
+  }
+
+  // ── Overlay Trigger: send !so command to chat so LegionX_Shoutout OBS overlay picks it up ──
+  if (APP_STATE.settings.overlayTrigger) {
+    const cmd = (APP_STATE.settings.overlayCommand || 'so').replace(/^!/, '');
+    sendBroadcasterChatMessage(`!${cmd} @${clean}`);
+    triggerToast(`🎞️ Overlay triggered via !${cmd} for @${clean}`, 'info');
   }
 
   if (APP_STATE.chatters.has(clean)) {
@@ -1948,7 +1957,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const openSettingsBtn = document.getElementById('openSettingsBtn');
   const closeSettingsModalBtn = document.getElementById('closeSettingsModalBtn');
   if (settingsModal && openSettingsBtn && closeSettingsModalBtn) {
-    openSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+    openSettingsBtn.addEventListener('click', () => {
+      settingsModal.classList.remove('hidden');
+      // Populate overlay settings from state when modal opens
+      const overlayTriggerToggle = document.getElementById('overlayTriggerToggle');
+      const overlayCommandField  = document.getElementById('overlayCommandField');
+      if (overlayTriggerToggle) overlayTriggerToggle.checked = APP_STATE.settings.overlayTrigger;
+      if (overlayCommandField)  overlayCommandField.value   = APP_STATE.settings.overlayCommand;
+    });
     closeSettingsModalBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
   }
 
@@ -1979,6 +1995,19 @@ document.addEventListener('DOMContentLoaded', () => {
         validateAndLoadToken();
       } else if (ch) {
         connectToTwitchChannel(ch);
+      }
+
+      // Save overlay integration settings
+      const overlayTriggerToggle = document.getElementById('overlayTriggerToggle');
+      const overlayCommandField  = document.getElementById('overlayCommandField');
+      if (overlayTriggerToggle) {
+        APP_STATE.settings.overlayTrigger = overlayTriggerToggle.checked;
+        localStorage.setItem('sp_overlay_trigger', overlayTriggerToggle.checked);
+      }
+      if (overlayCommandField) {
+        const cmd = overlayCommandField.value.trim().replace(/^!/, '') || 'so';
+        APP_STATE.settings.overlayCommand = cmd;
+        localStorage.setItem('sp_overlay_command', cmd);
       }
 
       if (settingsModal) settingsModal.classList.add('hidden');
