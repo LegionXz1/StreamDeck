@@ -66,7 +66,7 @@ const APP_STATE = {
   settings: {
     soundEnabled: localStorage.getItem('sp_sound') !== 'false',
     postChat: localStorage.getItem('sp_post_chat') !== 'false',
-    shoutoutTemplate: localStorage.getItem('sp_so_template') || '⭐ Check out @{username} at https://twitch.tv/{username} ! They were last streaming {game} — give them a follow! 💜',
+    shoutoutTemplate: localStorage.getItem('sp_so_template') || '!so @{username}',
     simMode: localStorage.getItem('sp_sim_mode') === 'true',
     activeFilter: localStorage.getItem('sp_active_filter') || 'all',
     overlayTrigger: localStorage.getItem('sp_overlay_trigger') === 'true',
@@ -2140,7 +2140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('resetTemplateBtn').addEventListener('click', () => {
-      templateTextarea.value = '⭐ Check out @{username} at https://twitch.tv/{username} ! They were last streaming {game} — give them a follow! 💜';
+      templateTextarea.value = '!so @{username}';
       refreshTemplatePreview();
     });
   }
