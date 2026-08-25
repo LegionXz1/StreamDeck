@@ -11,7 +11,12 @@
 // Public Twitch Client ID (Implicit Grant — safe to hardcode, no secret involved)
 // All visitors use this app registration; each user gets their OWN token in their browser.
 const DEFAULT_CLIENT_ID = 'iit7nefwjmvapujq4lttes3qbt90y5';
-const DEFAULT_CHANNEL = '';
+// ── LegionX Public API Gateway ──
+// Hosted backend: no credentials needed for public Twitch data
+const LEGIONX_API = 'https://legionx.alwaysdata.net';
+
+const DEFAULT_CHANNEL = 'legionxiz1';
+const TWITCH_CLIENT_ID = 'i57i2ydkebcpzqvlyzfhmnuqccbdgd';
 
 const DEFAULT_MACROS = [
   { id: '1', cmd: '!discord', label: 'Discord Community', message: '📢 Join our official Discord community for alerts, stream schedule, and game nights: https://discord.gg/streamer' },
@@ -447,24 +452,38 @@ function handleDisconnect() {
 // ==========================================================================
 
 async function fetchTwitchUserProfile(login) {
-  if (!APP_STATE.auth.token || !APP_STATE.auth.clientId) return null;
   const clean = login.replace(/^@/, '').trim().toLowerCase();
   if (!clean) return null;
 
-  try {
-    const res = await fetch(`https://api.twitch.tv/helix/users?login=${clean}`, {
-      headers: {
-        'Client-Id': APP_STATE.auth.clientId,
-        'Authorization': `Bearer ${APP_STATE.auth.token}`
+  // ── Primary: Helix API (requires OAuth) ──
+  if (APP_STATE.auth.token && APP_STATE.auth.clientId) {
+    try {
+      const res = await fetch(`https://api.twitch.tv/helix/users?login=${clean}`, {
+        headers: {
+          'Client-Id': APP_STATE.auth.clientId,
+          'Authorization': `Bearer ${APP_STATE.auth.token}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.data && data.data[0]) return data.data[0];
       }
-    });
+    } catch (e) {
+      console.warn('Helix user profile failed, falling back to LegionX API:', e);
+    }
+  }
+
+  // ── Fallback: LegionX public gateway (no credentials needed) ──
+  try {
+    const res = await fetch(`${LEGIONX_API}/getuserinfo.php?channel=${clean}`);
     if (res.ok) {
       const data = await res.json();
       if (data.data && data.data[0]) return data.data[0];
     }
   } catch (e) {
-    console.warn('Failed to fetch user profile:', e);
+    console.warn('LegionX API user profile failed:', e);
   }
+
   return null;
 }
 
